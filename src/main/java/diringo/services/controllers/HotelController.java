@@ -1,10 +1,13 @@
 package diringo.services.controllers;
 
 import diringo.services.data.HotelRequest;
+import diringo.services.data.HotelResult;
 import diringo.services.services.HotelService;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @Author Akbar
@@ -18,8 +21,8 @@ public class HotelController {
         this.hotelService = hotelService;
     }
 
-    @GetMapping("/hotel")
-    public void getHotels(@RequestBody(required = true) HotelRequest request){
-        hotelService.findHotels(request);
+    @PostMapping("/hotel")
+    public List<HotelResult> getHotels(@RequestBody(required = true) HotelRequest request) {
+        return hotelService.findHotels(request);
     }
 }
