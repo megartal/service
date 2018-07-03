@@ -9,8 +9,12 @@ import diringo.services.documents.OTAEntity;
 import diringo.services.models.OTAData;
 import diringo.services.models.Price;
 import diringo.services.models.Room;
+import diringo.services.models.RoomPriceInfo;
+import diringo.services.ota.OTA;
 import diringo.services.repositories.hotel.HotelRepository;
+import diringo.services.util.OTAFactory;
 import ir.huri.jcal.JalaliCalendar;
+import org.apache.commons.lang.time.DateUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -48,40 +52,48 @@ public class HotelService {
         String[] fromArray = request.getFrom().split("/");
         String[] toArray = request.getTo().split("/");
         Date from = new JalaliCalendar(Integer.parseInt(fromArray[0]), Integer.parseInt(fromArray[1]), Integer.parseInt(fromArray[2])).toGregorian().getTime();
-        Date to = new JalaliCalendar(Integer.parseInt(toArray[0]), Integer.parseInt(toArray[1]), Integer.parseInt(toArray[2])).toGregorian().getTime();
+        Date rawDateTo = new JalaliCalendar(Integer.parseInt(toArray[0]), Integer.parseInt(toArray[1]), Integer.parseInt(toArray[2])).toGregorian().getTime();
+        Date to = DateUtils.addHours(rawDateTo, 3);
         List<Hotel> hotels = hotelRepository.findByCity(request.getCity());
         List<HotelResult> orderedHotels = new ArrayList<>();
         for (Hotel hotel : hotels) {
-            Map<Integer, Integer> minRoomTypes = getRoomTypes();
             List<OTAResult> otaResults = new ArrayList<>();
             for (OTAData ota : hotel.getData()) {
+                OTA otaInstance = OTAFactory.create(ota.getOTAName());
+//                RedirectData redirectData = new RedirectData();
+                Map<Integer, Integer> minRoomTypes = getRoomTypes();
+                Map<Integer, String> minRoomNames = new HashMap<>();
                 for (Room room : ota.getRooms()) {
+//                    redirectData.setUrlPattern(ota.getRedirect());
+//                    redirectData.getRoomIds().put(room.getRoomId());
+//                    redirectData.getMeta().add(room.getMeta());
                     if (room.getRoomType() == 0)
                         break;
                     int roomTotal = 0;
                     for (Price price : room.getPrices()) {
                         if (price.getDate().before(to) && price.getDate().after(from)) {
                             if (price.isAvailable()) {
-                                roomTotal = price.getValue();
+                                roomTotal += price.getValue();
                             } else {
                                 roomTotal = 0;
                                 break;
                             }
                         }
                     }
-                    if (roomTotal < minRoomTypes.get(room.getRoomType()) && roomTotal != 0)
+                    if (roomTotal < minRoomTypes.get(room.getRoomType()) && roomTotal != 0) {
                         minRoomTypes.put(room.getRoomType(), roomTotal);
+                        minRoomNames.put(room.getRoomType(), room.getRoomName());
+                    }
                 }
-                int minPriceSuggestion = calculateMinPrice(guestPriceKey, minRoomTypes);
-                //Fixme must add room ids and types to redirect URL
-                if (minPriceSuggestion < Integer.MAX_VALUE)
+                RoomPriceInfo minPriceSuggestion = calculateMinPrice(guestPriceKey, minRoomTypes, minRoomNames);
+                if (minPriceSuggestion.getValue() < Integer.MAX_VALUE)
                     otaResults.add(new OTAResult(new OTAEntity(ota.getOTAName()), minPriceSuggestion, ota.getRedirect()));
             }
             HotelResult hotelResult = new HotelResult();
             if (!otaResults.isEmpty()) {
-                hotelResult.setHotelMinValue(otaResults.get(0).getValue());
+                hotelResult.setHotelMinValue(otaResults.get(0).getPriceInfo().getValue());
             }
-            Collections.sort(otaResults, (o1, o2) -> (o1.getValue() - o2.getValue()));
+            Collections.sort(otaResults, (o1, o2) -> (o1.getPriceInfo().getValue() - o2.getPriceInfo().getValue()));
             hotelResult.setOtaResults(new HashSet<>(otaResults));
             hotelResult.setHotelId(hotel.getId());
             hotelResult.setHotelName(hotel.getName());
@@ -105,22 +117,24 @@ public class HotelService {
         return orderedHotels;
     }
 
-    private int calculateMinPrice(String key, Map<Integer, Integer> minRoomTypes) {
+    private RoomPriceInfo calculateMinPrice(String key, Map<Integer, Integer> minRoomTypes, Map<Integer, String> minRoomNames) {
         Map<Integer, ArrayList<Integer>> result = new HashMap<>();
         ArrayList<ArrayList<Integer>> categories = GuestRoomMatch.match.get(key);
         int minPrice = Integer.MAX_VALUE;
-        ArrayList<Integer> selectedCategory = null;
+        ArrayList<String> selectedCategory = null;
         for (ArrayList<Integer> category : categories) {
+            ArrayList<String> roomsCategory = new ArrayList<>();
             int value = 0;
             for (Integer roomType : category) {
                 value += minRoomTypes.get(roomType);
+                roomsCategory.add(minRoomNames.get(roomType));
             }
             if (value < minPrice && value != 0) {
                 minPrice = value;
-                selectedCategory = category;
+                selectedCategory = roomsCategory;
             }
         }
-        return minPrice;
+        return new RoomPriceInfo(minPrice, selectedCategory);
     }
 
     private Map<Integer, Integer> getRoomTypes() {

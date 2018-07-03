@@ -1,6 +1,7 @@
 package diringo.services.data;
 
 import diringo.services.documents.OTAEntity;
+import diringo.services.models.RoomPriceInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class OTAResult {
     private OTAEntity ota;
-    private int value;
+    private RoomPriceInfo priceInfo;
     private String redirect;
+
 }
