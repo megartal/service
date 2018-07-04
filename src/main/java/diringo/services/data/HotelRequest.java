@@ -15,5 +15,5 @@ public class HotelRequest {
     private String to;
     private int guest;
     private int rooms;
-    private String sortBy;
+    private String sort;
 }
