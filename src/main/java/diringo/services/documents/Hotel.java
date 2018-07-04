@@ -1,16 +1,13 @@
 package diringo.services.documents;
 
-import diringo.services.models.Amenity;
-import diringo.services.models.Location;
-import diringo.services.models.OTAData;
-import diringo.services.models.ScrapInfo;
+import diringo.services.models.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.awt.*;
-import java.util.*;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @Document
 @Getter
@@ -22,7 +19,7 @@ public class Hotel {
     private String district;
     private String city;
     private String mainImage;
-    private List<Image> images = new ArrayList<>();
+    private Set<Image> images = new HashSet<>();
     private String address;
     private Integer stars;
     private String description;

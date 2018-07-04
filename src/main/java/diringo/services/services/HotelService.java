@@ -9,9 +9,11 @@ import diringo.services.models.OTAData;
 import diringo.services.models.Price;
 import diringo.services.models.Room;
 import diringo.services.repositories.hotel.HotelRepository;
+import ir.huri.jcal.JalaliCalendar;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -43,6 +45,10 @@ public class HotelService {
     }
 
     public List<HotelResult> findHotels(HotelRequest request) {
+        String[] fromArray = request.getFrom().split("/");
+        String[] toArray = request.getTo().split("/");
+        Date from = new JalaliCalendar(Integer.parseInt(fromArray[0]), Integer.parseInt(fromArray[1]), Integer.parseInt(fromArray[2])).toGregorian().getTime();
+        Date to = new JalaliCalendar(Integer.parseInt(toArray[0]), Integer.parseInt(toArray[1]), Integer.parseInt(toArray[2])).toGregorian().getTime();
         List<Hotel> hotels = hotelRepository.findByCity(request.getCity());
         List<HotelResult> orderedHotels = new ArrayList<>();
         for (Hotel hotel : hotels) {
@@ -55,7 +61,7 @@ public class HotelService {
                         if (!price.isAvailable()) {
                             break;
                         } else {
-                            if (price.getDate().before(request.getTo()) && price.getDate().after(request.getFrom())) {
+                            if (price.getDate().before(to) && price.getDate().after(from)) {
                                 roomTotal = price.getValue();
                             }
                         }
@@ -67,7 +73,19 @@ public class HotelService {
             }
             HotelResult hotelResult = new HotelResult();
             hotelResult.getOtaResults().add(otaResult);
+            hotelResult.setHotelId(hotel.getId());
+            hotelResult.setHotelName(hotel.getName());
+            hotelResult.setAddress(hotel.getAddress());
+            hotelResult.setAccomType(hotel.getAccomType());
+            hotelResult.setAmenities(hotel.getAmenities());
+            hotelResult.setCancelPolicy(hotel.getCancelPolicy());
+            hotelResult.setDescription(hotel.getDescription());
+            hotelResult.setImages(hotel.getImages());
+            hotelResult.setLocation(hotel.getLocation());
+            hotelResult.setStars(hotel.getStars());
+            hotelResult.setMealPlan(hotel.getMealPlan());
             orderedHotels.add(hotelResult);
+            //sort
         }
         return orderedHotels;
     }
