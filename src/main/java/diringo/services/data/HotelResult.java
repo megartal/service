@@ -29,4 +29,5 @@ public class HotelResult {
     private String cancelPolicy;
     private String accomType;
     private Set<OTAResult> otaResults = new HashSet<>();
+    private int hotelMinValue;
 }

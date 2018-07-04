@@ -12,9 +12,7 @@ import diringo.services.repositories.hotel.HotelRepository;
 import ir.huri.jcal.JalaliCalendar;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Author Akbar
@@ -52,27 +50,30 @@ public class HotelService {
         List<Hotel> hotels = hotelRepository.findByCity(request.getCity());
         List<HotelResult> orderedHotels = new ArrayList<>();
         for (Hotel hotel : hotels) {
-            OTAResult otaResult = null;
+            List<OTAResult> otaResults = new ArrayList<>();
             for (OTAData ota : hotel.getData()) {
                 int OTAMinPrice = Integer.MAX_VALUE;
                 for (Room room : ota.getRooms()) {
                     int roomTotal = 0;
                     for (Price price : room.getPrices()) {
-                        if (!price.isAvailable()) {
-                            break;
-                        } else {
-                            if (price.getDate().before(to) && price.getDate().after(from)) {
+                        if (price.getDate().before(to) && price.getDate().after(from)) {
+                            if (price.isAvailable()) {
                                 roomTotal = price.getValue();
+                            } else {
+                                roomTotal = 0;
+                                break;
                             }
                         }
                     }
                     if (roomTotal < OTAMinPrice && roomTotal != 0)
                         OTAMinPrice = roomTotal;
                 }
-                otaResult = new OTAResult(new OTAEntity(ota.getOTAName()), OTAMinPrice);
+                otaResults.add(new OTAResult(new OTAEntity(ota.getOTAName()), OTAMinPrice, ota.getRedirect()));
             }
             HotelResult hotelResult = new HotelResult();
-            hotelResult.getOtaResults().add(otaResult);
+            Collections.sort(otaResults, (o1, o2) -> (o1.getValue() - o2.getValue()));
+            hotelResult.setOtaResults(new HashSet<>(otaResults));
+            hotelResult.setHotelMinValue(otaResults.get(0).getValue());
             hotelResult.setHotelId(hotel.getId());
             hotelResult.setHotelName(hotel.getName());
             hotelResult.setAddress(hotel.getAddress());
@@ -85,7 +86,12 @@ public class HotelService {
             hotelResult.setStars(hotel.getStars());
             hotelResult.setMealPlan(hotel.getMealPlan());
             orderedHotels.add(hotelResult);
-            //sort
+            Collections.sort(orderedHotels, (o1, o2) -> (o1.getHotelMinValue() - o2.getHotelMinValue()));
+            if (request.getSortBy().equals("star_high")) {
+                Collections.sort(orderedHotels, (o1, o2) -> (o2.getStars() - o1.getStars()));
+            } else if (request.getSortBy().equals("star_low")) {
+                Collections.sort(orderedHotels, (o1, o2) -> (o1.getStars() - o2.getStars()));
+            }
         }
         return orderedHotels;
     }

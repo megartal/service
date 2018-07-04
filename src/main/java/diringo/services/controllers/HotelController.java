@@ -21,7 +21,7 @@ public class HotelController {
         this.hotelService = hotelService;
     }
 
-    @PostMapping("/hotel")
+    @PostMapping("/hotels")
     public List<HotelResult> getHotels(@RequestBody(required = true) HotelRequest request) {
         return hotelService.findHotels(request);
     }

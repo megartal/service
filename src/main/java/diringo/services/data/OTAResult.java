@@ -15,4 +15,5 @@ import lombok.Setter;
 public class OTAResult {
     private OTAEntity ota;
     private int value;
+    private String redirect;
 }
