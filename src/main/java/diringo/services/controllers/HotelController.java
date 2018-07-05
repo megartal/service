@@ -3,8 +3,8 @@ package diringo.services.controllers;
 import diringo.services.data.HotelRequest;
 import diringo.services.data.HotelResult;
 import diringo.services.services.HotelService;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -21,8 +21,9 @@ public class HotelController {
         this.hotelService = hotelService;
     }
 
-    @PostMapping("/hotels")
-    public List<HotelResult> getHotels(@RequestBody(required = true) HotelRequest request) {
+    @CrossOrigin(origins = "http://localhost:3000")
+    @PostMapping("/api/search")
+    public List<HotelResult> getHotels(HotelRequest request) {
         return hotelService.findHotels(request);
     }
 }
