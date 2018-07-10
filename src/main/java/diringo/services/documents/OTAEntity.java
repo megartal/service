@@ -17,11 +17,11 @@ public class OTAEntity {
     private String id = UUID.randomUUID().toString();
     private String name;
     private String website;
+    private String logo;
 
     public OTAEntity(String otaName) {
         this.name = otaName;
     }
-//    private String logo;
 //    private String roomDivSelector;
 //    private String webservice;
 //    private String roomXpath;
