@@ -1,10 +1,12 @@
 package diringo.services.data;
 
+import diringo.services.models.Amenity;
 import diringo.services.models.Location;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,17 +23,13 @@ public class HotelResult {
     private String image1;
     private String image2;
     private String image3;
-    //    private List<Image> images;
-    private String address;
     private Integer stars;
-    private String description;
-    private String amenity1;
-    private String amenity2;
-    //    private Set<Amenity> amenities = new HashSet<>();
-    private Location location = new Location("", "");
-    //    private String mealPlan;
-//    private String cancelPolicy;
-//    private String accomType;
+    private String address;
+    private String desc;
+    private Location location;
+    private List<Amenity> amenities;
+    private boolean internet;
+    private boolean parking;
     private Set<OTAResult> otaResults = new HashSet<>();
     private int otaResultNum;
     private int hotelMinValue = Integer.MAX_VALUE;

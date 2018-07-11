@@ -12,7 +12,18 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class RequestQuert {
+    private String city;
     private int night;
     private int guest;
     private int rooms;
+    private String from;
+    private String to;
+    private String sort;
+    private int page;
+
+    public RequestQuert(int night, int guest, int rooms) {
+        this.night = night;
+        this.guest = guest;
+        this.rooms = rooms;
+    }
 }

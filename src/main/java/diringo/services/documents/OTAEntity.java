@@ -1,6 +1,8 @@
 package diringo.services.documents;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -13,15 +15,13 @@ import java.util.UUID;
 @Getter
 @Setter
 @Document(collection = "OTA")
+@AllArgsConstructor
+@NoArgsConstructor
 public class OTAEntity {
     private String id = UUID.randomUUID().toString();
     private String name;
     private String website;
     private String logo;
-
-    public OTAEntity(String otaName) {
-        this.name = otaName;
-    }
 //    private String roomDivSelector;
 //    private String webservice;
 //    private String roomXpath;

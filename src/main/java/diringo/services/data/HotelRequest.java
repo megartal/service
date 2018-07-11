@@ -16,4 +16,5 @@ public class HotelRequest {
     private int guest;
     private int rooms;
     private String sort = "";
+    private int page = 0;
 }

@@ -1,18 +1,14 @@
 package diringo.services.services;
 
 import diringo.services.GuestRoomMatch;
-import diringo.services.data.HotelRequest;
-import diringo.services.data.HotelResult;
-import diringo.services.data.OTAResult;
-import diringo.services.data.RequestQuert;
+import diringo.services.data.*;
 import diringo.services.documents.Hotel;
 import diringo.services.documents.OTAEntity;
-import diringo.services.models.OTAData;
-import diringo.services.models.Price;
-import diringo.services.models.Room;
-import diringo.services.models.RoomPriceInfo;
+import diringo.services.models.*;
 import diringo.services.ota.OTA;
+import diringo.services.repositories.OTARepository;
 import diringo.services.repositories.hotel.HotelRepository;
+import diringo.services.util.DataConverter;
 import diringo.services.util.OTAFactory;
 import ir.huri.jcal.JalaliCalendar;
 import org.apache.commons.lang.time.DateUtils;
@@ -27,9 +23,11 @@ import java.util.*;
 @Service
 public class HotelService {
     private final HotelRepository hotelRepository;
+    private final OTARepository otaRepository;
 
-    public HotelService(HotelRepository hotelRepository) {
+    public HotelService(HotelRepository hotelRepository, OTARepository otaRepository) {
         this.hotelRepository = hotelRepository;
+        this.otaRepository = otaRepository;
     }
 
     public List<Hotel> getAllHotels() {
@@ -48,7 +46,8 @@ public class HotelService {
         hotelRepository.save(hotelToPersist);
     }
 
-    public List<HotelResult> findHotels(HotelRequest request) {
+    public Result findHotels(HotelRequest request) {
+        Map<String, OTAEntity> otAs = getOTAs();
         String guestPriceKey = request.getGuest() + "" + request.getRooms();
         String[] fromArray = request.getFrom().split("/");
         String[] toArray = request.getTo().split("/");
@@ -89,7 +88,7 @@ public class HotelService {
                 try {
                     RoomPriceInfo minPriceSuggestion = calculateMinPrice(guestPriceKey, minRoomTypes, minRoomNames);
                     if (minPriceSuggestion.getValue() < Integer.MAX_VALUE && minPriceSuggestion.getValue() > 0)
-                        otaResults.add(new OTAResult(new OTAEntity(ota.getOTAName()), minPriceSuggestion, ota.getRedirect()));
+                        otaResults.add(new OTAResult(getOTAs().get(ota.getOTAName()), minPriceSuggestion, ota.getRedirect()));
                 } catch (Exception e) {
                     System.out.println("");
                 }
@@ -101,41 +100,49 @@ public class HotelService {
             Collections.sort(otaResults, (o1, o2) -> (o1.getPriceInfo().getValue() - o2.getPriceInfo().getValue()));
             hotelResult.setOtaResults(new HashSet<>(otaResults));
             hotelResult.setOtaResultNum(otaResults.size());
-            hotelResult.setQuery(new RequestQuert((to.getDay() - from.getDay()), request.getGuest(), request.getRooms()));
+            hotelResult.setQuery(new RequestQuert((to.getDay() - from.getDay()),
+                    request.getGuest(), request.getRooms()));
             hotelResult.setHotelId(hotel.getId());
             hotelResult.setHotelName(hotel.getName());
-            hotelResult.setAddress(hotel.getAddress());
-//            hotelResult.setAccomType(hotel.getAccomType());
-//            hotelResult.setAmenities(hotel.getAmenities());
-//            hotelResult.setCancelPolicy(hotel.getCancelPolicy());
-            hotelResult.setDescription(hotel.getDescription());
-//            hotelResult.setImages(hotel.getImages());
             hotelResult.setMainImage(hotel.getMainImage());
-            hotelResult.setLocation(hotel.getLocation());
-            if (hotel.getImages().size() > 3) {
+            if (hotel.getImages().size() > 2) {
                 hotelResult.setImage1(hotel.getImages().get(0).getSrc());
                 hotelResult.setImage2(hotel.getImages().get(1).getSrc());
                 hotelResult.setImage3(hotel.getImages().get(2).getSrc());
             }
-            if (hotel.getAmenities().size() > 3) {
-                if (hotel.getAmenities().get(0).isValue())
-                    hotelResult.setAmenity1(hotel.getAmenities().get(0).getName());
-                if (hotel.getAmenities().get(1).isValue())
-                    hotelResult.setAmenity1(hotel.getAmenities().get(1).getName());
-                if (hotel.getAmenities().get(2).isValue())
-                    hotelResult.setImage3(hotel.getAmenities().get(2).getName());
+            for (Amenity amenity : hotel.getAmenities()) {
+                if (amenity.getName().contains("اینترنت در اتاق"))
+                    hotelResult.setInternet(true);
+                if (amenity.getName().contains("پارکینگ"))
+                    hotelResult.setParking(true);
             }
             hotelResult.setStars(hotel.getStars());
-//            hotelResult.setMealPlan(hotel.getMealPlan());
+            hotelResult.setAddress(hotel.getAddress());
+            hotelResult.setDesc(hotel.getDescription());
+            hotelResult.setLocation(hotel.getLocation());
+            hotelResult.setAmenities(hotel.getAmenities());
             orderedHotels.add(hotelResult);
         }
         Collections.sort(orderedHotels, (o1, o2) -> (o1.getHotelMinValue() - o2.getHotelMinValue()));
-//        if (request.getSort().equals("star_high")) {
-//            Collections.sort(orderedHotels, (o1, o2) -> (o2.getStars() - o1.getStars()));
-//        } else if (request.getSort().equals("star_low")) {
-//            Collections.sort(orderedHotels, (o1, o2) -> (o1.getStars() - o2.getStars()));
-//        }
-        return orderedHotels;
+        if (request.getSort().equals("stars-desc")) {
+            Collections.sort(orderedHotels, (o1, o2) -> (o2.getStars() - o1.getStars()));
+        } else if (request.getSort().equals("stars-asc")) {
+            Collections.sort(orderedHotels, (o1, o2) -> (o1.getStars() - o2.getStars()));
+        }
+        List<HotelResult> hotelResults = orderedHotels.subList(request.getPage() * 10, request.getPage() * 10 + 10);
+        Result result = new Result(hotelResults, new RequestQuert(request.getCity(), (to.getDay() - from.getDay()), request.getGuest(),
+                request.getRooms(), DataConverter.farsiDate(request.getFrom()), DataConverter.farsiDate(request.getTo()), DataConverter.sortConv(request.getSort()), request.getPage())
+                , orderedHotels.size());
+        return result;
+    }
+
+    private Map<String, OTAEntity> getOTAs() {
+        Map<String, OTAEntity> map = new HashMap<>();
+        List<OTAEntity> all = otaRepository.findAll();
+        for (OTAEntity otaEntity : all) {
+            map.put(otaEntity.getName(), otaEntity);
+        }
+        return map;
     }
 
     private RoomPriceInfo calculateMinPrice(String key, Map<Integer, Integer> minRoomTypes, Map<Integer, String> minRoomNames) throws Exception {
