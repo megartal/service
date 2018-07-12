@@ -25,6 +25,7 @@ public class HotelResult {
     private String image3;
     private Integer stars;
     private String address;
+    private int grade;
     private String desc;
     private Location location;
     private List<Amenity> amenities;

@@ -17,7 +17,7 @@ public class HotelRequest {
     private int rooms;
     private String sort = "";
     private int page = 0;
-    private String type = "";
+    private String type = "hotel";
     private int star = 0;
     private int range = 0;
 }

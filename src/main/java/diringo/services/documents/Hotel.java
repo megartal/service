@@ -19,17 +19,14 @@ public class Hotel {
     private String mainImage;
     private List<Image> images = new ArrayList<>();
     private String address;
-    private String category;
+    private String category = "hotel";
     private String warning;
     private String information;
     private String rules;
-    private Integer grade;
-    private Integer stars;
+    private Integer grade = 200;
+    private Integer stars = 3;
     private String description;
     private List<Amenity> amenities = new ArrayList<>();
     private Location location = new Location("", "");
-    private String mealPlan;
-    private String cancelPolicy;
-    private String accomType;
     private Set<OTAData> data = new HashSet<>();
 }
