@@ -129,7 +129,7 @@ public class HotelService {
         } else if (request.getSort().equals("stars-asc")) {
             Collections.sort(orderedHotels, (o1, o2) -> (o1.getStars() - o2.getStars()));
         }
-        List<HotelResult> hotelResults = orderedHotels.subList(request.getPage() * 10, request.getPage() * 10 + 10);
+        List<HotelResult> hotelResults = orderedHotels.subList((request.getPage() - 1) * 10, (request.getPage() - 1) * 10 + 10);
         Result result = new Result(hotelResults, new RequestQuert(request.getCity(), (to.getDay() - from.getDay()), request.getGuest(),
                 request.getRooms(), DataConverter.farsiDate(request.getFrom()), DataConverter.farsiDate(request.getTo()), DataConverter.sortConv(request.getSort()), request.getPage())
                 , orderedHotels.size());
