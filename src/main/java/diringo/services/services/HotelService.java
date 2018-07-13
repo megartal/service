@@ -78,6 +78,22 @@ public class HotelService {
                 if (!otaResults.isEmpty()) {
                     hotelResult.setHotelMinValue(otaResults.get(0).getPriceInfo().getValue());
                 }
+                if (request.getRange() == 1) {
+                    if (hotelResult.getHotelMinValue() > 100000)
+                        continue;
+                } else if (request.getRange() == 2) {
+                    if (hotelResult.getHotelMinValue() > 200000 || hotelResult.getHotelMinValue() < 100000)
+                        continue;
+                } else if (request.getRange() == 3) {
+                    if (hotelResult.getHotelMinValue() > 500000 || hotelResult.getHotelMinValue() < 200000)
+                        continue;
+                } else if (request.getRange() == 4) {
+                    if (hotelResult.getHotelMinValue() > 1000000 || hotelResult.getHotelMinValue() < 500000)
+                        continue;
+                } else if (request.getRange() == 5) {
+                    if (hotelResult.getHotelMinValue() < 1000000)
+                        continue;
+                }
                 if (hotelResult.getHotelMinValue() == Integer.MAX_VALUE)
                     continue;
                 hotelResult.setOtaResults(new HashSet<>(otaResults));
