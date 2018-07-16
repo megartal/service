@@ -21,10 +21,10 @@ public class CityRepositoryCustomImpl implements CityRepositoryCustom {
     }
 
     @Override
-    public List<City> findCity(String city) {
+    public List<City> findCity(String term) {
         Query query = new Query();
-        query.limit(2);
-        query.addCriteria(Criteria.where(CITY).regex(city));
+        query.limit(5);
+        query.addCriteria(Criteria.where(CITY).regex(term));
         return template.find(query, City.class);
     }
 }

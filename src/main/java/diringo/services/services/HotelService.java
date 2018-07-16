@@ -29,6 +29,8 @@ public class HotelService {
     }
 
     public Result findHotels(HotelRequest request) {
+        String query = request.getQ().replaceAll("\\+", " ");
+        HotelResult hotelQueryResult = null;
         Result result = null;
         try {
             String guestPriceKey = request.getGuest() + "" + request.getRooms();
@@ -119,6 +121,8 @@ public class HotelService {
                 hotelResult.setDesc(hotel.getDescription());
                 hotelResult.setLocation(hotel.getLocation());
                 hotelResult.setGrade(hotel.getGrade());
+                if (query.equals(hotel.getName()))
+                    hotelQueryResult = hotelResult;
                 orderedHotels.add(hotelResult);
             }
             Collections.sort(orderedHotels, (o1, o2) -> (o1.getHotelMinValue() - o2.getHotelMinValue()));
@@ -137,6 +141,8 @@ public class HotelService {
             } else {
                 lastIndex = ((request.getPage() - 1) * 10 + 10);
             }
+            if (hotelQueryResult != null)
+                orderedHotels.add(0, hotelQueryResult);
             List<HotelResult> hotelResults = orderedHotels.subList((request.getPage() - 1) * 10, lastIndex);
             result = new Result(hotelResults, new RequestQuert(request.getCity(), (to.getDay() - from.getDay()), request.getGuest(),
                     request.getRooms(), DataConverter.farsiDate(request.getFrom()), DataConverter.farsiDate(request.getTo()), DataConverter.sortConv(request.getSort()), request.getPage())
@@ -146,6 +152,7 @@ public class HotelService {
         }
         return result;
     }
+
 
     private Date getJalaliDate(String date) {
         String[] array = date.split("/");

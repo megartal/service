@@ -10,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class HotelRequest {
+    private String q;
     private String city;
     private String from;
     private String to;
