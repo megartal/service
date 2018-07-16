@@ -197,4 +197,9 @@ public class HotelService {
         map.put(5, Integer.MAX_VALUE);
         return map;
     }
+
+    public List<Image> findImages(String hotelId) {
+        Optional<Hotel> hotelById = hotelRepository.findById(hotelId);
+        return hotelById.get().getImages();
+    }
 }
