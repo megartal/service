@@ -2,6 +2,7 @@ package diringo.services.services;
 
 import diringo.services.GuestRoomMatch;
 import diringo.services.data.*;
+import diringo.services.documents.City;
 import diringo.services.documents.Hotel;
 import diringo.services.documents.OTAEntity;
 import diringo.services.models.*;
@@ -22,10 +23,12 @@ import java.util.*;
 public class HotelService {
     private final HotelRepository hotelRepository;
     private final OTARepository otaRepository;
+    private final CityService cityService;
 
-    public HotelService(HotelRepository hotelRepository, OTARepository otaRepository) {
+    public HotelService(HotelRepository hotelRepository, OTARepository otaRepository, CityService cityService) {
         this.hotelRepository = hotelRepository;
         this.otaRepository = otaRepository;
+        this.cityService = cityService;
     }
 
     public Result findHotels(HotelRequest request) {
@@ -37,6 +40,9 @@ public class HotelService {
             Date from = getJalaliDate(request.getFrom());
             Date to = getJalaliDate(request.getTo());
             to = DateUtils.addHours(to, 3);
+            City city = cityService.findCityByName(request.getCity());
+            if (city.isCrawl())
+                return null;
             List<Hotel> hotels = hotelRepository.findByCity(request.getCity());
             List<HotelResult> orderedHotels = new ArrayList<>();
             for (Hotel hotel : hotels) {

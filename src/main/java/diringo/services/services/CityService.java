@@ -40,4 +40,8 @@ public class CityService {
         }
         return results;
     }
+
+    public City findCityByName(String city) {
+        return cityRepository.findByCity(city).get();
+    }
 }
