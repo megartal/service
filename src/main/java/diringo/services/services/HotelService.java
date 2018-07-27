@@ -218,7 +218,9 @@ public class HotelService {
     public List<Image> findImages(String hotelId) {
         Optional<Hotel> hotelById = hotelRepository.findById(hotelId);
         List<Image> images = hotelById.get().getImages();
-        images.forEach(x -> x.getSrc().replace("/", "-"));
+        for (Image image : images) {
+            image.setSrc(image.getSrc().replace("/", "-"));
+        }
         return images;
     }
 }
