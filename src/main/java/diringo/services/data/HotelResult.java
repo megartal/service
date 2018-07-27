@@ -5,9 +5,8 @@ import diringo.services.models.Location;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @Author Akbar
@@ -18,7 +17,7 @@ import java.util.Set;
 public class HotelResult {
     private String HotelId;
     private String HotelName;
-    private RequestQuert query;
+    private RequestQuery query;
     private String mainImage;
     private String image1;
     private String image2;
@@ -31,7 +30,7 @@ public class HotelResult {
     private List<Amenity> amenities;
     private boolean internet;
     private boolean parking;
-    private Set<OTAResult> otaResults = new HashSet<>();
+    private List<OTAResult> otaResults = new ArrayList<>();
     private int otaResultNum;
     private int hotelMinValue = Integer.MAX_VALUE;
 }

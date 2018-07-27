@@ -14,6 +14,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author Akbar
@@ -46,6 +47,8 @@ public class HotelService {
             List<Hotel> hotels = hotelRepository.findByCity(request.getCity());
             List<HotelResult> orderedHotels = new ArrayList<>();
             for (Hotel hotel : hotels) {
+                if (hotel.getMainImage() == null || hotel.getImages().size() == 0)
+                    continue;
                 if (request.getStar() != 0 && hotel.getStars() != request.getStar())
                     continue;
                 if (!hotel.getCategory().equals(request.getType()))
@@ -55,8 +58,8 @@ public class HotelService {
                     Map<Integer, Integer> minRoomTypes = getRoomTypes();
                     Map<Integer, String> minRoomNames = new HashMap<>();
                     for (Room room : ota.getRooms()) {
-                        if (room.getRoomType() == 0)
-                            break;
+                        if (room.getRoomType() == 0 || room.getRoomType() > 9)
+                            continue;
                         int roomTotal = 0;
                         for (Price price : room.getPrices()) {
                             if (price.getDate().before(to) && price.getDate().after(from)) {
@@ -104,17 +107,17 @@ public class HotelService {
                 }
                 if (hotelResult.getHotelMinValue() == Integer.MAX_VALUE)
                     continue;
-                hotelResult.setOtaResults(new HashSet<>(otaResults));
+                hotelResult.setOtaResults(new ArrayList<>(otaResults));
                 hotelResult.setOtaResultNum(otaResults.size());
-                hotelResult.setQuery(new RequestQuert((to.getDay() - from.getDay()),
+                hotelResult.setQuery(new RequestQuery(TimeUnit.DAYS.convert((to.getTime() - from.getTime()), TimeUnit.MILLISECONDS),
                         request.getGuest(), request.getRooms()));
                 hotelResult.setHotelId(hotel.getId());
                 hotelResult.setHotelName(hotel.getName());
                 hotelResult.setMainImage(hotel.getMainImage());
                 if (hotel.getImages().size() > 2) {
-                    hotelResult.setImage1(hotel.getImages().get(0).getSrc());
-                    hotelResult.setImage2(hotel.getImages().get(1).getSrc());
-                    hotelResult.setImage3(hotel.getImages().get(2).getSrc());
+                    hotelResult.setImage1(hotel.getImages().get(0).getSrc().replace("/", "-"));
+                    hotelResult.setImage2(hotel.getImages().get(1).getSrc().replace("/", "-"));
+                    hotelResult.setImage3(hotel.getImages().get(2).getSrc().replace("/", "-"));
                 }
                 for (Amenity amenity : hotel.getAmenities()) {
                     if (amenity.getName().contains("اینترنت در اتاق"))
@@ -150,7 +153,7 @@ public class HotelService {
             if (hotelQueryResult != null)
                 orderedHotels.add(0, hotelQueryResult);
             List<HotelResult> hotelResults = orderedHotels.subList((request.getPage() - 1) * 10, lastIndex);
-            result = new Result(hotelResults, new RequestQuert(request.getCity(), (to.getDay() - from.getDay()), request.getGuest(),
+            result = new Result(hotelResults, new RequestQuery(request.getCity(), (to.getDay() - from.getDay()), request.getGuest(),
                     request.getRooms(), DataConverter.farsiDate(request.getFrom()), DataConverter.farsiDate(request.getTo()), DataConverter.sortConv(request.getSort()), request.getPage())
                     , orderedHotels.size());
         } catch (Exception e) {
@@ -183,6 +186,10 @@ public class HotelService {
             ArrayList<String> roomsCategory = new ArrayList<>();
             int value = 0;
             for (Integer roomType : category) {
+                if (minRoomNames.get(roomType) == null) {
+                    value = Integer.MAX_VALUE;
+                    break;
+                }
                 value += minRoomTypes.get(roomType);
                 roomsCategory.add(minRoomNames.get(roomType));
             }
@@ -201,6 +208,10 @@ public class HotelService {
         map.put(3, Integer.MAX_VALUE);
         map.put(4, Integer.MAX_VALUE);
         map.put(5, Integer.MAX_VALUE);
+        map.put(6, Integer.MAX_VALUE);
+        map.put(7, Integer.MAX_VALUE);
+        map.put(8, Integer.MAX_VALUE);
+        map.put(9, Integer.MAX_VALUE);
         return map;
     }
 

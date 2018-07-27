@@ -15,6 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 public class Result {
     private List<HotelResult> hotelResult;
-    private RequestQuert query;
+    private RequestQuery query;
     private int resultNum;
 }
