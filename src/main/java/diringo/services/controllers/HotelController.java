@@ -18,6 +18,7 @@ import java.util.List;
 public class HotelController {
     private final HotelService hotelService;
 
+
     public HotelController(HotelService hotelService) {
         this.hotelService = hotelService;
     }
