@@ -42,8 +42,6 @@ public class HotelService {
             Date to = getJalaliDate(request.getTo());
             to = DateUtils.addHours(to, 3);
             City city = cityService.findCityByName(request.getCity());
-            if (city.isCrawl())
-                return null;
             List<Hotel> hotels = hotelRepository.findByCity(request.getCity());
             List<HotelResult> orderedHotels = new ArrayList<>();
             for (Hotel hotel : hotels) {
