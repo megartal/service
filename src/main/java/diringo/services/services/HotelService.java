@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @Author Akbar
@@ -119,12 +120,12 @@ public class HotelService {
                     hotelResult.setImage2(hotel.getImages().get(1).getSrc().replace("/", "-"));
                     hotelResult.setImage3(hotel.getImages().get(2).getSrc().replace("/", "-"));
                 }
-                for (Amenity amenity : hotel.getAmenities()) {
-                    if (amenity.getName().contains("اینترنت در اتاق"))
-                        hotelResult.setInternet(true);
-                    if (amenity.getName().contains("پارکینگ"))
-                        hotelResult.setParking(true);
-                }
+//                for (Amenity amenity : hotel.getAmenities()) {
+//                    if (amenity.getName().contains("اینترنت در اتاق"))
+//                        hotelResult.setInternet(true);
+//                    if (amenity.getName().contains("پارکینگ"))
+//                        hotelResult.setParking(true);
+//                }
                 hotelResult.setStars(hotel.getStars());
                 hotelResult.setAddress(hotel.getAddress());
                 hotelResult.setDesc(hotel.getDescription());
@@ -198,7 +199,18 @@ public class HotelService {
                 selectedCategory = roomsCategory;
             }
         }
-        return new RoomPriceInfo(minPrice, selectedCategory);
+        ArrayList<ProposedRoom> rooms = new ArrayList<>();
+        Map<String, List<String>> collect = selectedCategory.stream().collect(Collectors.groupingBy(w -> w));
+        for (Map.Entry<String, List<String>> entry : collect.entrySet()) {
+            String name = entry.getKey();
+            if (name.length() > 15) {
+                String substring = name.substring(0, 25);
+                name = substring + "...";
+            }
+            ProposedRoom proposedRoom = new ProposedRoom(name, entry.getValue().size());
+            rooms.add(proposedRoom);
+        }
+        return new RoomPriceInfo(minPrice, rooms);
     }
 
     private Map<Integer, Integer> getRoomTypes() {
