@@ -9,7 +9,6 @@ import diringo.services.models.*;
 import diringo.services.repositories.OTARepository;
 import diringo.services.repositories.hotel.HotelRepository;
 import diringo.services.util.DataConverter;
-import ir.huri.jcal.JalaliCalendar;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.stereotype.Service;
 
@@ -39,8 +38,8 @@ public class HotelService {
         Result result = null;
         try {
             String guestPriceKey = request.getGuest() + "" + request.getRooms();
-            Date from = getJalaliDate(request.getFrom());
-            Date to = getJalaliDate(request.getTo());
+            Date from = DataConverter.jalaliToJavaDate(request.getFrom());
+            Date to = DataConverter.jalaliToJavaDate(request.getTo());
             to = DateUtils.addHours(to, 3);
             City city = cityService.findCityByName(request.getCity());
             List<Hotel> hotels = hotelRepository.findByCity(request.getCity());
@@ -77,8 +76,10 @@ public class HotelService {
                     }
                     try {
                         RoomPriceInfo minPriceSuggestion = calculateMinPrice(guestPriceKey, minRoomTypes, minRoomNames);
-                        if (minPriceSuggestion.getValue() < Integer.MAX_VALUE && minPriceSuggestion.getValue() > 0)
-                            otaResults.add(new OTAResult(getOTAs().get(ota.getOTAName()), minPriceSuggestion, ota.getRedirect()));
+                        if (minPriceSuggestion.getValue() < Integer.MAX_VALUE && minPriceSuggestion.getValue() > 0) {
+                            String redirectURL = ota.getRedirect() + getRedirectDate(ota.getOTAName(), request.getFrom(), request.getTo());
+                            otaResults.add(new OTAResult(getOTAs().get(ota.getOTAName()), minPriceSuggestion, redirectURL));
+                        }
                     } catch (Exception e) {
                         System.out.println("");
                     }
@@ -131,9 +132,11 @@ public class HotelService {
                 hotelResult.setDesc(hotel.getDescription());
                 hotelResult.setLocation(hotel.getLocation());
                 hotelResult.setGrade(hotel.getGrade());
-                if (query.equals(hotel.getName()))
+                if (query.equals(hotel.getName())) {
                     hotelQueryResult = hotelResult;
-                orderedHotels.add(hotelResult);
+                } else {
+                    orderedHotels.add(hotelResult);
+                }
             }
             Collections.sort(orderedHotels, (o1, o2) -> (o1.getHotelMinValue() - o2.getHotelMinValue()));
             if (request.getSort().equals("stars-desc")) {
@@ -161,12 +164,6 @@ public class HotelService {
             System.out.println(e.getMessage());
         }
         return result;
-    }
-
-
-    private Date getJalaliDate(String date) {
-        String[] array = date.split("/");
-        return new JalaliCalendar(Integer.parseInt(array[0]), Integer.parseInt(array[1]), Integer.parseInt(array[2])).toGregorian().getTime();
     }
 
     private Map<String, OTAEntity> getOTAs() {
@@ -204,7 +201,7 @@ public class HotelService {
         for (Map.Entry<String, List<String>> entry : collect.entrySet()) {
             String name = entry.getKey();
             if (name.length() > 15) {
-                String substring = name.substring(0, 25);
+                String substring = name.substring(0, 14);
                 name = substring + "...";
             }
             ProposedRoom proposedRoom = new ProposedRoom(name, entry.getValue().size());
@@ -234,5 +231,29 @@ public class HotelService {
             image.setSrc(image.getSrc().replace("/", "-"));
         }
         return images;
+    }
+
+    public String getRedirectDate(String ota, String from, String to) {
+        String snapptrip = "?adults=1&date_from=%s&date_to=%s";
+        String jabama = "?checkIn=%s&checkOut=%s";
+        String jainjas = "?from=%s&to=%s&searched=true&IsCertain=false&star=0";
+        Calendar calFrom = Calendar.getInstance();
+        calFrom.setTime(DataConverter.jalaliToJavaDate(from));
+        Calendar calTo = Calendar.getInstance();
+        calTo.setTime(DataConverter.jalaliToJavaDate(to));
+        String url = null;
+        switch (ota) {
+            case "snapptrip":
+                url = String.format(snapptrip, calFrom.get(Calendar.YEAR) + "-" + (calFrom.get(Calendar.MONTH) + 1) + "-" + calFrom.get(Calendar.DAY_OF_MONTH),
+                        calTo.get(Calendar.YEAR) + "-" + (calTo.get(Calendar.MONTH) + 1) + "-" + calTo.get(Calendar.DAY_OF_MONTH));
+                break;
+            case "jabama":
+                url = String.format(jabama, from.replace("/", ""), to.replace("/", ""));
+                break;
+            case "jainjas":
+                url = String.format(jainjas, from, to);
+                break;
+        }
+        return url;
     }
 }

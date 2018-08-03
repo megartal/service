@@ -1,5 +1,8 @@
 package diringo.services.util;
 
+import ir.huri.jcal.JalaliCalendar;
+
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,5 +44,10 @@ public class DataConverter {
 
     public static String sortConv(String sort) {
         return map2.get(sort);
+    }
+
+    public static Date jalaliToJavaDate(String date) {
+        String[] array = date.split("/");
+        return new JalaliCalendar(Integer.parseInt(array[0]), Integer.parseInt(array[1]), Integer.parseInt(array[2])).toGregorian().getTime();
     }
 }
