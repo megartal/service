@@ -253,6 +253,9 @@ public class HotelService {
             case "jainjas":
                 url = String.format(jainjas, from, to);
                 break;
+            case "eghamat24":
+                url = "";
+                break;
         }
         return url;
     }
