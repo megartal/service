@@ -90,16 +90,16 @@ public class HotelService {
                     hotelResult.setHotelMinValue(otaResults.get(0).getPriceInfo().getValue());
                 }
                 if (request.getRange() == 1) {
-                    if (hotelResult.getHotelMinValue() > 100000)
+                    if (hotelResult.getHotelMinValue() > 200000)
                         continue;
                 } else if (request.getRange() == 2) {
-                    if (hotelResult.getHotelMinValue() > 200000 || hotelResult.getHotelMinValue() < 100000)
+                    if (hotelResult.getHotelMinValue() > 400000 || hotelResult.getHotelMinValue() < 200000)
                         continue;
                 } else if (request.getRange() == 3) {
-                    if (hotelResult.getHotelMinValue() > 500000 || hotelResult.getHotelMinValue() < 200000)
+                    if (hotelResult.getHotelMinValue() > 700000 || hotelResult.getHotelMinValue() < 400000)
                         continue;
                 } else if (request.getRange() == 4) {
-                    if (hotelResult.getHotelMinValue() > 1000000 || hotelResult.getHotelMinValue() < 500000)
+                    if (hotelResult.getHotelMinValue() > 1000000 || hotelResult.getHotelMinValue() < 700000)
                         continue;
                 } else if (request.getRange() == 5) {
                     if (hotelResult.getHotelMinValue() < 1000000)
@@ -156,7 +156,7 @@ public class HotelService {
             }
             if (hotelQueryResult != null)
                 orderedHotels.add(0, hotelQueryResult);
-            List<HotelResult> hotelResults = orderedHotels.subList((request.getPage() - 1) * 10, lastIndex);
+            List<HotelResult> hotelResults = orderedHotels.subList((request.getPage() - 1) * 10, lastIndex + 1);
             result = new Result(hotelResults, new RequestQuery(request.getCity(), (to.getDay() - from.getDay()), request.getGuest(),
                     request.getRooms(), DataConverter.farsiDate(request.getFrom()), DataConverter.farsiDate(request.getTo()), DataConverter.sortConv(request.getSort()), request.getPage())
                     , orderedHotels.size());
