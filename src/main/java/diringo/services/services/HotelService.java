@@ -45,102 +45,106 @@ public class HotelService {
             List<Hotel> hotels = hotelRepository.findByCity(request.getCity());
             List<HotelResult> orderedHotels = new ArrayList<>();
             for (Hotel hotel : hotels) {
-                if (hotel.getMainImage() == null || hotel.getMainImage().equals("") || hotel.getImages().size() == 0)
-                    continue;
-                if (request.getStar() != 0 && hotel.getStars() != request.getStar())
-                    continue;
-                if (!hotel.getCategory().equals(request.getType()))
-                    continue;
-                List<OTAResult> otaResults = new ArrayList<>();
-                for (OTAData ota : hotel.getData()) {
-                    Map<Integer, Integer> minRoomTypes = getRoomTypes();
-                    Map<Integer, String> minRoomNames = new HashMap<>();
-                    for (Room room : ota.getRooms()) {
-                        if (room.getRoomType() == 0 || room.getRoomType() > 9)
-                            continue;
-                        int roomTotal = 0;
-                        for (Price price : room.getPrices()) {
-                            if (price.getDate().before(to) && price.getDate().after(from)) {
-                                if (price.isAvailable()) {
-                                    roomTotal += price.getValue();
-                                } else {
-                                    roomTotal = 0;
-                                    break;
+                try {
+                    if (hotel.getMainImage() == null || hotel.getMainImage().equals("") || hotel.getImages().size() == 0)
+                        continue;
+                    if (request.getStar() != 0 && hotel.getStars() != request.getStar())
+                        continue;
+                    if (!hotel.getCategory().equals(request.getType()))
+                        continue;
+                    List<OTAResult> otaResults = new ArrayList<>();
+                    for (OTAData ota : hotel.getData()) {
+                        Map<Integer, Integer> minRoomTypes = getRoomTypes();
+                        Map<Integer, String> minRoomNames = new HashMap<>();
+                        for (Room room : ota.getRooms()) {
+                            if (room.getRoomType() == 0 || room.getRoomType() > 9)
+                                continue;
+                            int roomTotal = 0;
+                            for (Price price : room.getPrices()) {
+                                if (price.getDate().before(to) && price.getDate().after(from)) {
+                                    if (price.isAvailable()) {
+                                        roomTotal += price.getValue();
+                                    } else {
+                                        roomTotal = 0;
+                                        break;
+                                    }
                                 }
                             }
+                            if (roomTotal < minRoomTypes.get(room.getRoomType()) && roomTotal > 0) {
+                                minRoomTypes.put(room.getRoomType(), roomTotal);
+                                minRoomNames.put(room.getRoomType(), room.getRoomName());
+                            }
                         }
-                        if (roomTotal < minRoomTypes.get(room.getRoomType()) && roomTotal > 0) {
-                            minRoomTypes.put(room.getRoomType(), roomTotal);
-                            minRoomNames.put(room.getRoomType(), room.getRoomName());
+                        try {
+                            RoomPriceInfo minPriceSuggestion = calculateMinPrice(guestPriceKey, minRoomTypes, minRoomNames);
+                            if (minPriceSuggestion.getValue() < Integer.MAX_VALUE && minPriceSuggestion.getValue() > 0) {
+                                String redirectURL = ota.getRedirect() + getRedirectDate(ota.getOTAName(), request.getFrom(), request.getTo());
+                                otaResults.add(new OTAResult(getOTAs().get(ota.getOTAName()), minPriceSuggestion, redirectURL));
+                            }
+                        } catch (Exception e) {
+                            System.out.println("");
                         }
                     }
-                    try {
-                        RoomPriceInfo minPriceSuggestion = calculateMinPrice(guestPriceKey, minRoomTypes, minRoomNames);
-                        if (minPriceSuggestion.getValue() < Integer.MAX_VALUE && minPriceSuggestion.getValue() > 0) {
-                            String redirectURL = ota.getRedirect() + getRedirectDate(ota.getOTAName(), request.getFrom(), request.getTo());
-                            otaResults.add(new OTAResult(getOTAs().get(ota.getOTAName()), minPriceSuggestion, redirectURL));
-                        }
-                    } catch (Exception e) {
-                        System.out.println("");
+                    HotelResult hotelResult = new HotelResult();
+                    Collections.sort(otaResults, (o1, o2) -> (o1.getPriceInfo().getValue() - o2.getPriceInfo().getValue()));
+                    if (!otaResults.isEmpty()) {
+                        hotelResult.setHotelMinValue(otaResults.get(0).getPriceInfo().getValue());
                     }
-                }
-                HotelResult hotelResult = new HotelResult();
-                Collections.sort(otaResults, (o1, o2) -> (o1.getPriceInfo().getValue() - o2.getPriceInfo().getValue()));
-                if (!otaResults.isEmpty()) {
-                    hotelResult.setHotelMinValue(otaResults.get(0).getPriceInfo().getValue());
-                }
-                if (request.getRange() == 1) {
-                    if (hotelResult.getHotelMinValue() > 200000)
+                    if (request.getRange() == 1) {
+                        if (hotelResult.getHotelMinValue() > 200000)
+                            continue;
+                    } else if (request.getRange() == 2) {
+                        if (hotelResult.getHotelMinValue() > 400000 || hotelResult.getHotelMinValue() < 200000)
+                            continue;
+                    } else if (request.getRange() == 3) {
+                        if (hotelResult.getHotelMinValue() > 700000 || hotelResult.getHotelMinValue() < 400000)
+                            continue;
+                    } else if (request.getRange() == 4) {
+                        if (hotelResult.getHotelMinValue() > 1000000 || hotelResult.getHotelMinValue() < 700000)
+                            continue;
+                    } else if (request.getRange() == 5) {
+                        if (hotelResult.getHotelMinValue() < 1000000)
+                            continue;
+                    }
+                    if (hotelResult.getHotelMinValue() == Integer.MAX_VALUE)
                         continue;
-                } else if (request.getRange() == 2) {
-                    if (hotelResult.getHotelMinValue() > 400000 || hotelResult.getHotelMinValue() < 200000)
-                        continue;
-                } else if (request.getRange() == 3) {
-                    if (hotelResult.getHotelMinValue() > 700000 || hotelResult.getHotelMinValue() < 400000)
-                        continue;
-                } else if (request.getRange() == 4) {
-                    if (hotelResult.getHotelMinValue() > 1000000 || hotelResult.getHotelMinValue() < 700000)
-                        continue;
-                } else if (request.getRange() == 5) {
-                    if (hotelResult.getHotelMinValue() < 1000000)
-                        continue;
-                }
-                if (hotelResult.getHotelMinValue() == Integer.MAX_VALUE)
-                    continue;
-                hotelResult.setOtaResults(new ArrayList<>(otaResults));
-                hotelResult.setOtaResultNum(otaResults.size());
-                hotelResult.setQuery(new RequestQuery(TimeUnit.DAYS.convert((to.getTime() - from.getTime()), TimeUnit.MILLISECONDS),
-                        request.getGuest(), request.getRooms()));
-                hotelResult.setHotelId(hotel.getId());
-                hotelResult.setHotelName(hotel.getName());
-                String mainImage = "";
-                if (hotel.getMainImage().contains("https://")) {
-                    mainImage = hotel.getMainImage().replace("https://images.jabama.com/", "mainImage-");
-                    mainImage = mainImage + ".jpg";
-                } else if (hotel.getMainImage().contains("/")) {
-                    mainImage = hotel.getMainImage().replace("/", "-");
-                }
-                hotelResult.setMainImage(mainImage);
-                if (hotel.getImages().size() > 2) {
-                    hotelResult.setImage1(hotel.getImages().get(0).getSrc().replace("/", "-"));
-                    hotelResult.setImage2(hotel.getImages().get(1).getSrc().replace("/", "-"));
-                    hotelResult.setImage3(hotel.getImages().get(2).getSrc().replace("/", "-"));
-                }
+                    hotelResult.setOtaResults(new ArrayList<>(otaResults));
+                    hotelResult.setOtaResultNum(otaResults.size());
+                    hotelResult.setQuery(new RequestQuery(TimeUnit.DAYS.convert((to.getTime() - from.getTime()), TimeUnit.MILLISECONDS),
+                            request.getGuest(), request.getRooms()));
+                    hotelResult.setHotelId(hotel.getId());
+                    hotelResult.setHotelName(hotel.getName());
+                    String mainImage = "";
+                    if (hotel.getMainImage().contains("https://")) {
+                        mainImage = hotel.getMainImage().replace("https://images.jabama.com/", "mainImage-");
+                        mainImage = mainImage + ".jpg";
+                    } else if (hotel.getMainImage().contains("/")) {
+                        mainImage = hotel.getMainImage().replace("/", "-");
+                    }
+                    hotelResult.setMainImage(mainImage);
+                    if (hotel.getImages().size() > 2) {
+                        hotelResult.setImage1(hotel.getImages().get(0).getSrc().replace("/", "-"));
+                        hotelResult.setImage2(hotel.getImages().get(1).getSrc().replace("/", "-"));
+                        hotelResult.setImage3(hotel.getImages().get(2).getSrc().replace("/", "-"));
+                    }
 //                for (Amenity amenity : hotel.getAmenities()) {
 //                    if (amenity.getName().contains("اینترنت در اتاق"))
 //                        hotelResult.setInternet(true);
 //                    if (amenity.getName().contains("پارکینگ"))
 //                        hotelResult.setParking(true);
 //                }
-                hotelResult.setStars(hotel.getStars());
-                hotelResult.setAddress(hotel.getAddress());
-                hotelResult.setDesc(hotel.getDescription());
-                hotelResult.setLocation(hotel.getLocation());
-                hotelResult.setGrade(hotel.getGrade());
-                if (query.equals(hotel.getName())) {
-                    hotelQueryResult = hotelResult;
-                } else {
-                    orderedHotels.add(hotelResult);
+                    hotelResult.setStars(hotel.getStars());
+                    hotelResult.setAddress(hotel.getAddress());
+                    hotelResult.setDesc(hotel.getDescription());
+                    hotelResult.setLocation(hotel.getLocation());
+                    hotelResult.setGrade(hotel.getGrade());
+                    if (query.equals(hotel.getName())) {
+                        hotelQueryResult = hotelResult;
+                    } else {
+                        orderedHotels.add(hotelResult);
+                    }
+                } catch (Exception e) {
+                    continue;
                 }
             }
             Collections.sort(orderedHotels, (o1, o2) -> (o1.getHotelMinValue() - o2.getHotelMinValue()));
