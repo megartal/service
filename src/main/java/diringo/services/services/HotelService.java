@@ -45,7 +45,7 @@ public class HotelService {
             List<Hotel> hotels = hotelRepository.findByCity(request.getCity());
             List<HotelResult> orderedHotels = new ArrayList<>();
             for (Hotel hotel : hotels) {
-                if (hotel.getMainImage() == null || hotel.getImages().size() == 0)
+                if (hotel.getMainImage() == null || hotel.getMainImage().equals("") || hotel.getImages().size() == 0)
                     continue;
                 if (request.getStar() != 0 && hotel.getStars() != request.getStar())
                     continue;
