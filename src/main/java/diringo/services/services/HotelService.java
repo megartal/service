@@ -113,8 +113,13 @@ public class HotelService {
                         request.getGuest(), request.getRooms()));
                 hotelResult.setHotelId(hotel.getId());
                 hotelResult.setHotelName(hotel.getName());
-                String mainImage = hotel.getMainImage().replace("https://images.jabama.com/", "mainImage-");
-                mainImage = mainImage + ".jpg";
+                String mainImage = "";
+                if (hotel.getMainImage().contains("https://")) {
+                    mainImage = hotel.getMainImage().replace("https://images.jabama.com/", "mainImage-");
+                    mainImage = mainImage + ".jpg";
+                } else if (hotel.getMainImage().contains("/")) {
+                    mainImage = hotel.getMainImage().replace("/", "-");
+                }
                 hotelResult.setMainImage(mainImage);
                 if (hotel.getImages().size() > 2) {
                     hotelResult.setImage1(hotel.getImages().get(0).getSrc().replace("/", "-"));
