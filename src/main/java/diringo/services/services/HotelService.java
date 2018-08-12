@@ -84,6 +84,7 @@ public class HotelService {
                         } catch (Exception e) {
                             System.out.println("");
                         }
+
                     }
                     HotelResult hotelResult = new HotelResult();
                     Collections.sort(otaResults, (o1, o2) -> (o1.getPriceInfo().getValue() - o2.getPriceInfo().getValue()));
