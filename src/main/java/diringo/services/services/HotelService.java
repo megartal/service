@@ -159,7 +159,7 @@ public class HotelService {
                 Collections.sort(orderedHotels, (o1, o2) -> (o2.getHotelMinValue() - o1.getHotelMinValue()));
             }
             int lastIndex;
-            if (orderedHotels.size() < ((request.getPage() - 1) * 10 + 10)) {
+            if (orderedHotels.size() < ((request.getPage() - 1) * 10 + 11)) {
                 lastIndex = orderedHotels.size() - 1;
             } else {
                 lastIndex = ((request.getPage() - 1) * 10 + 10);
