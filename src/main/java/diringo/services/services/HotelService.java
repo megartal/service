@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 public class HotelService {
     private final HotelRepository hotelRepository;
     private final OTARepository otaRepository;
+
     private final CityService cityService;
 
     public HotelService(HotelRepository hotelRepository, OTARepository otaRepository, CityService cityService) {
