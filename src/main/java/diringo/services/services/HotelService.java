@@ -122,6 +122,8 @@ public class HotelService {
                         mainImage = mainImage + ".jpg";
                     } else if (hotel.getMainImage().contains("/")) {
                         mainImage = hotel.getMainImage().replace("/", "-");
+                    } else {
+                        mainImage = hotel.getMainImage();
                     }
                     hotelResult.setMainImage(mainImage);
                     if (hotel.getImages().size() > 2) {
