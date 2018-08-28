@@ -213,10 +213,10 @@ public class HotelService {
         Map<String, List<String>> collect = selectedCategory.stream().collect(Collectors.groupingBy(w -> w));
         for (Map.Entry<String, List<String>> entry : collect.entrySet()) {
             String name = entry.getKey();
-            if (name.length() > 15) {
-                String substring = name.substring(0, 14);
-                name = substring + "...";
-            }
+//            if (name.length() > 15) {
+//                String substring = name.substring(0, 14);
+//                name = substring + "...";
+//            }
             ProposedRoom proposedRoom = new ProposedRoom(name, entry.getValue().size());
             rooms.add(proposedRoom);
         }

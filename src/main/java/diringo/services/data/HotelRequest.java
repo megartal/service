@@ -14,8 +14,8 @@ public class HotelRequest {
     private String city;
     private String from;
     private String to;
-    private int guest;
-    private int rooms;
+    private int guest = 2;
+    private int rooms = 1;
     private String sort = "";
     private int page = 0;
     private String type = "hotel";

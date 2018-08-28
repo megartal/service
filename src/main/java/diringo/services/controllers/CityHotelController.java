@@ -1,8 +1,7 @@
 package diringo.services.controllers;
 
-import diringo.services.data.AutoComplete;
-import diringo.services.services.CityService;
-import diringo.services.services.HotelService;
+import diringo.services.documents.AutoComplete;
+import diringo.services.services.AutoCompleteService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,12 +15,10 @@ import java.util.List;
  */
 @RestController
 public class CityHotelController {
-    private final CityService cityService;
-    private final HotelService hotelService;
+    private final AutoCompleteService autoCompleteService;
 
-    public CityHotelController(CityService cityService, HotelService hotelService) {
-        this.cityService = cityService;
-        this.hotelService = hotelService;
+    public CityHotelController(AutoCompleteService autoCompleteService) {
+        this.autoCompleteService = autoCompleteService;
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
@@ -29,11 +26,7 @@ public class CityHotelController {
     public List<AutoComplete> getAutoCompleteData(String term) {
         if (term == null)
             return new ArrayList<>();
-        ArrayList<AutoComplete> list = cityService.findCity(term);
-        if (list.size() > 5) {
-            return list.subList(0, 5);
-        } else {
-            return list;
-        }
+        List<AutoComplete> search = autoCompleteService.findSearch(term);
+        return search;
     }
 }

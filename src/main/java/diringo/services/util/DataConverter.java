@@ -28,6 +28,16 @@ public class DataConverter {
         map.put("11", "بهمن");
         map.put("12", "اسغند");
 
+        map.put("1", "فروردین");
+        map.put("2", "اردیبهشت");
+        map.put("3", "خرداد");
+        map.put("4", "تیر");
+        map.put("5", "مرداد");
+        map.put("6", "شهریور");
+        map.put("7", "مهر");
+        map.put("8", "آبان");
+        map.put("9", "آذر");
+
         map2.put("popularity", "امتیاز");
         map2.put("price-asc", "قیمت (کمترین به بیشترین)");
         map2.put("price-desc", "قیمت (بیشترین به کمترین)");
