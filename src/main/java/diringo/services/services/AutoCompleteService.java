@@ -30,6 +30,14 @@ public class AutoCompleteService {
 //            results.add(new AutoComplete(hotel.getName(), hotel.getCity(), hotel.getCity(), "هتل"));
 //        }
         List<AutoComplete> autoCompletes = autoCompleteRepository.findTerm(term);
-        return autoCompletes;
+        for (AutoComplete autoComplete : autoCompletes) {
+            if (autoComplete.getProvince() == null) {
+                autoComplete.setProvince(autoComplete.getCity());
+                results.add(autoComplete);
+            } else {
+                results.add(autoComplete);
+            }
+        }
+        return results;
     }
 }
