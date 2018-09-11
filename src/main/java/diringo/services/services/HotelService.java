@@ -269,6 +269,9 @@ public class HotelService {
             case "eghamat24":
                 url = "";
                 break;
+            case "safarme":
+                url = "";
+                break;
         }
         return url;
     }
