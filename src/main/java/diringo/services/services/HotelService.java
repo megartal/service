@@ -41,7 +41,7 @@ public class HotelService {
             String guestPriceKey = request.getGuest() + "" + request.getRooms();
             Date from = DataConverter.jalaliToJavaDate(request.getFrom());
             Date to = DataConverter.jalaliToJavaDate(request.getTo());
-            to = DateUtils.addHours(to, 3);
+            to = DateUtils.addMilliseconds(to, 3);
             City city = cityService.findCityByName(request.getCity());
             List<Hotel> hotels = hotelRepository.findByCity(request.getCity());
             List<HotelResult> orderedHotels = new ArrayList<>();
