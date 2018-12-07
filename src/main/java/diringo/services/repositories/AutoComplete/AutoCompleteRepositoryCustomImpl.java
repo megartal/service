@@ -26,5 +26,6 @@ public class AutoCompleteRepositoryCustomImpl implements AutoCompleteRepositoryC
         query.limit(5);
         query.addCriteria(Criteria.where(NAME).regex(term));
         return template.find(query, AutoComplete.class);
+
     }
 }
