@@ -2,7 +2,6 @@ package diringo.services.services;
 
 import diringo.services.GuestRoomMatch;
 import diringo.services.data.*;
-import diringo.services.documents.City;
 import diringo.services.documents.Hotel;
 import diringo.services.documents.OTAEntity;
 import diringo.services.models.*;
@@ -42,16 +41,13 @@ public class HotelService {
             Date from = DataConverter.jalaliToJavaDate(request.getFrom());
             Date to = DataConverter.jalaliToJavaDate(request.getTo());
             to = DateUtils.addMilliseconds(to, 3);
-            City city = cityService.findCityByName(request.getCity());
-            List<Hotel> hotels = hotelRepository.findByCity(request.getCity());
+            List<Hotel> hotels = hotelRepository.findByCityAndCategory(request.getCity(), request.getType());
             List<HotelResult> orderedHotels = new ArrayList<>();
             for (Hotel hotel : hotels) {
                 try {
                     if (hotel.getMainImage() == null || hotel.getMainImage().equals("") || hotel.getImages().size() == 0)
                         continue;
                     if (request.getStar() != 0 && hotel.getStars() != request.getStar())
-                        continue;
-                    if (!hotel.getCategory().equals(request.getType()))
                         continue;
                     List<OTAResult> otaResults = new ArrayList<>();
                     for (OTAData ota : hotel.getData()) {

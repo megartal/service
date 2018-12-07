@@ -21,15 +21,9 @@ public class AutoCompleteService {
 
     public List<AutoComplete> findSearch(String term) {
         ArrayList<AutoComplete> results = new ArrayList();
-//        List<City> cities = cityRepository.findCity(term);
-//        List<Hotel> hotels = hotelRepository.findHotel(term);
-//        for (City city : cities) {
-//            results.add(new AutoComplete(city.getCity(), city.getCity(), city.getDistrict(), "شهر"));
-//        }
-//        for (Hotel hotel : hotels) {
-//            results.add(new AutoComplete(hotel.getName(), hotel.getCity(), hotel.getCity(), "هتل"));
-//        }
-        List<AutoComplete> autoCompletes = autoCompleteRepository.findTerm(term);
+        List<AutoComplete> autoCompletes = autoCompleteRepository.findTop5ByNameStartsWith(term);
+        if (autoCompletes.size() == 0)
+            autoCompletes = autoCompleteRepository.findTerm(term);
         for (AutoComplete autoComplete : autoCompletes) {
             if (autoComplete.getProvince() == null) {
                 autoComplete.setProvince(autoComplete.getCity());
