@@ -165,7 +165,12 @@ public class HotelService {
             }
             if (hotelQueryResult != null)
                 orderedHotels.add(0, hotelQueryResult);
-            List<HotelResult> hotelResults = orderedHotels.subList((request.getPage() - 1) * 10, lastIndex + 1);
+            List<HotelResult> hotelResults;
+            if (request.isAllResults()) {
+                hotelResults = orderedHotels.subList((request.getPage() - 1) * 10, lastIndex + 1);
+            } else {
+                hotelResults = orderedHotels.subList(0, 1);
+            }
             result = new Result(hotelResults, new RequestQuery(request.getCity(), (to.getDay() - from.getDay()), request.getGuest(),
                     request.getRooms(), DataConverter.farsiDate(request.getFrom()), DataConverter.farsiDate(request.getTo()), DataConverter.sortConv(request.getSort()), request.getPage())
                     , orderedHotels.size());

@@ -21,4 +21,5 @@ public class HotelRequest {
     private String type = "hotel";
     private int star = 0;
     private int range = 0;
+    private boolean allResults = true;
 }
