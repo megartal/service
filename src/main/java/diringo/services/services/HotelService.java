@@ -251,10 +251,13 @@ public class HotelService {
         String snapptrip = "?adults=1&date_from=%s&date_to=%s";
         String jabama = "?checkIn=%s&checkOut=%s";
         String jainjas = "?from=%s&to=%s&searched=true&IsCertain=false&star=0";
+        String iranHotelOnline = "&date=%s&span=%s";
         Calendar calFrom = Calendar.getInstance();
-        calFrom.setTime(DataConverter.jalaliToJavaDate(from));
+        Date dateFrom = DataConverter.jalaliToJavaDate(from);
+        calFrom.setTime(dateFrom);
         Calendar calTo = Calendar.getInstance();
-        calTo.setTime(DataConverter.jalaliToJavaDate(to));
+        Date dateTo = DataConverter.jalaliToJavaDate(to);
+        calTo.setTime(dateTo);
         String url = null;
         switch (ota) {
             case "snapptrip":
@@ -273,7 +276,15 @@ public class HotelService {
             case "safarme":
                 url = "";
                 break;
+            case "iranHotelOnline":
+                url = String.format(iranHotelOnline, from, getDifferenceDays(dateFrom, dateTo));
+                break;
         }
         return url;
+    }
+
+    public long getDifferenceDays(Date d1, Date d2) {
+        long diff = d2.getTime() - d1.getTime();
+        return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
     }
 }
