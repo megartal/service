@@ -22,7 +22,7 @@ public class CityHotelController {
     }
 
     @CrossOrigin(origins = {"https://www.jootrip.com", "http://localhost:3000"})
-    @GetMapping("api/city")
+    @GetMapping("ppi/city")
     public List<AutoComplete> getAutoCompleteData(String term) {
         if (term == null)
             return new ArrayList<>();

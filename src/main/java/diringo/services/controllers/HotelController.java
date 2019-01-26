@@ -24,13 +24,13 @@ public class HotelController {
     }
 
     @CrossOrigin(origins = {"https://www.jootrip.com", "http://localhost:3000"})
-    @PostMapping("/api/search")
+    @PostMapping("/ppi/search")
     public Result getHotels(HotelRequest request) {
         return hotelService.findHotels(request);
     }
 
     @CrossOrigin(origins = {"https://www.jootrip.com", "http://localhost:3000"})
-    @PostMapping("/api/images")
+    @PostMapping("/ppi/images")
     public List<Image> getImages(String id) {
         return hotelService.findImages(id);
     }
